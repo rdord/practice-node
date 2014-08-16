@@ -12,7 +12,7 @@ function listDirs (callback) {
 			return;
 		}
 	
-		(function iterator(i) {		
+		(function iterator(i) {	//using recursion for async looping
 			if (i >= files.length) {
 				callback(null, dirsOnly);
 				return;
