@@ -61,7 +61,7 @@ function getAlbums(request, response) {
 	});
 }
 
-function listFiles (albumName, callback) { //has the callback function as an argument
+function listFiles (albumName, page, pageSize, callback) { //has the callback function as an argument
 	var rootDir = 'albums/'; //set the dir of which the content will be listed
 
 	fs.readdir(rootDir + albumName, function(err, files){  //reads the contents of a directory
@@ -74,7 +74,9 @@ function listFiles (albumName, callback) { //has the callback function as an arg
 	
 		(function iterator(i) {	//using recursion for async looping
 			if (i >= files.length) { //when all files are checked
-				callback(null, filesOnly); //pass the array or dir names in the callback
+				var limitedPhotos = filesOnly.splice(page * pageSize, pageSize);
+
+				callback(null, limitedPhotos); //pass the array or dir names in the callback
 				return;
 			}
 
@@ -97,9 +99,14 @@ function listFiles (albumName, callback) { //has the callback function as an arg
 
 function getPictures(request, response) {
 	var coreURL = request.parsedURL.pathname,
-			albumName = coreURL.substr(8, coreURL.length - 8 - 5); // /albums/[albumName].json
+			albumName = coreURL.substr(8, coreURL.length - 8 - 5), // /albums/[albumName].json
+			page = parseInt(request.parsedURL.query.page),
+			pageSize = parseInt(request.parsedURL.query.page_size);
 
-	listFiles(albumName, function (err, files) { //call function that lists files
+	if (isNaN(page) || page <= 0) page = 0;
+	if (isNaN(pageSize) || pageSize <= 0) pageSize = 20;
+
+	listFiles(albumName, page, pageSize, function (err, files) { //call function that lists files
 		if (err) { //if it has an error
 			response.writeHead(503, {
 				'Content-Type': 'application/json'
@@ -129,8 +136,10 @@ function getPictures(request, response) {
 function requestListener (request, response) {
 	console.log('Incoming request: (' + request.method + ') ' + request.url);
 
-	request.parsedURL = url.parse(request.url);
+	request.parsedURL = url.parse(request.url, true);
 	var coreURL = request.parsedURL.pathname;
+
+	console.log(request.parsedURL);
 
 	if (coreURL === '/albums.json') {
 		getAlbums(request, response);
