@@ -146,7 +146,7 @@ function requestListener (request, response) {
 	} 
 	else if (coreURL.substr(0, 8) === '/albums/' && 
 					 coreURL.substr(coreURL.length - 5) === '.json') { //if url starts with /albums/ and ends with .json
-		getPictures(request, response); 																 //e.g., /albums/italy2012.json
+		getPictures(request, response); 
 	}	
 	else {  //nonexistent url request
 		response.writeHead(404, {
@@ -161,3 +161,6 @@ function requestListener (request, response) {
 
 var server = http.createServer(requestListener);
 server.listen(8080);
+
+//localhost:8080/albums/italy2012.json?page=0&page_size=3
+//localhost:8080/albums/italy2012.json?page=1&page_size=2
